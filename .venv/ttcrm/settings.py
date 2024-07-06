@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     #local apps
     'leads',
     'agents',
+    'products',
     #third party apps
     'crispy_forms',
     "crispy_tailwind",
