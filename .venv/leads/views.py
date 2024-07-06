@@ -1,11 +1,12 @@
 from typing import Any
+from django.db.models.base import Model as Model
 from django.db.models.query import QuerySet
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.http import HttpResponse
 from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView, DeleteView, FormView
-from .models import Lead, Agent
-from .forms import LeadForm, LeadModelForm, CustomedUserCreationForm
+from .models import Lead, Agent, Category
+from .forms import LeadForm, LeadModelForm, CustomedUserCreationForm, AssignAgentForm, LeadCategoryUpdateForm
 from django.core.mail import send_mail
 from django.contrib.auth.mixins import LoginRequiredMixin
 from agents.mixins import OrganisorAndLoginRequiredMixin
@@ -97,6 +98,65 @@ class SignupView(CreateView):
     def get_success_url(self):
         return reverse("login")
 
+class CategoryListView(OrganisorAndLoginRequiredMixin, ListView):
+    template_name = "leads/category_list.html"
+    context_object_name = "category_list"
+
+    def get_context_data(self, **kwargs):
+        context = super(CategoryListView, self).get_context_data(**kwargs)
+        user = self.request.user
+
+        if user.is_organisor:
+            queryset = Lead.objects.filter(organisation = user.userprofile)
+        else:
+            queryset = Lead.objects.filter(organisation = user.agent.organisation)
+
+        context.update(
+            {
+                "unassigned_lead_count":Lead.objects.filter(category__isnull = True).count()
+            }
+        )
+        return context
+    
+    def get_queryset(self):
+        user = self.request.user
+        #initial query set of leads for tiktok
+        if user.is_organisor:
+            queryset = Category.objects.filter(organisation = user.userprofile)
+        else:
+            queryset = Category.objects.filter(organisation = user.agent.organisation)
+        return queryset
+
+class CategoryDetailView(LoginRequiredMixin, DetailView):
+    template_name = "leads/category_detail.html"
+    context_object_name = "category"
+    
+    def get_queryset(self):
+        user = self.request.user
+        #initial query set of leads for tiktok
+        if user.is_organisor:
+            queryset = Category.objects.filter(organisation = user.userprofile)
+        else:
+            queryset = Category.objects.filter(organisation = user.agent.organisation)
+        return queryset
+
+class LeadCategoryUpdateView(LoginRequiredMixin, UpdateView):
+    template_name = "leads/lead_category_update.html"
+    form_class = LeadCategoryUpdateForm
+    
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_organisor:
+            queryset = Lead.objects.filter(organisation = user.userprofile)
+        else:
+            queryset = Lead.objects.filter(organisation = user.agent.organisation)
+            #filter by sales person
+            queryset = queryset.filter(agent__user = user)
+        return queryset
+    
+    def get_success_url(self):
+        return reverse("leads:lead-detail", kwargs={"pk": self.get_object().id})
+        
 def lead_list(request):
     leads = Lead.objects.all()
     context = {
@@ -166,4 +226,23 @@ def lead_delete(request, pk):
     lead.delete()
     return redirect('/leads')
 
-class AssignAgentVIew(OrganisorAndLoginRequiredMixin, FormView):
+class AssignAgentView(OrganisorAndLoginRequiredMixin, FormView):
+    template_name = "leads/assign_agent.html"
+    form_class = AssignAgentForm
+
+    def get_form_kwargs(self):
+        kwargs = super(AssignAgentView, self).get_form_kwargs(**kwargs)
+        kwargs.update ({
+            "request": self.request
+        })
+        return kwargs
+    
+    def get_success_url(self):
+        return reverse("leads: lead-list")
+    
+    def form_valid(self, form):
+        agent = form.cleaned_data["agent"]
+        lead = Lead.objects.get(id = self.kwargs["pk"])
+        lead.agent = agent
+        lead.save()
+        return super(AssignAgentView, self).form_valid(form)

@@ -34,6 +34,7 @@ class Lead(models.Model):
     profile_picture = models.ImageField(blank=True, null = True)
     special_files = models.FileField(blank = True, null = True)
     agent = models.ForeignKey("Agent", null = True, blank= True, on_delete=models.SET_NULL)
+    category = models.ForeignKey("Category", related_name="leads", null = True, blank= True, on_delete= models.SET_NULL)
     #if CASCADE, agent is deleted, lead is deleted
     #if SET_NULL, lead is null
     #if SET_DEFAULT, lead is set to default
@@ -48,6 +49,13 @@ class Agent(models.Model):
     def __str__(self):
         return self.user.email
 
+class Category(models.Model):
+    name = models.CharField(max_length=30) #New, Contacted, Converted, Unconverted
+    organisation = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
+    
 def post_user_created_signal(sender, instance, created, **kwargs):
     if created:
         UserProfile.objects.create(user = instance)
