@@ -2,33 +2,22 @@
 
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8">
-    <meta name = 'viewport' content = "width=device-width, initial-scale=1.0">
-    <title>TTCRM</title>
-    <link href = "/static/css/styles.css/" rel = 'stylesheet' />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DJCRM</title>
+    <link href="{% static 'css/styles.css' %}" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.botpress.cloud/webchat/v1/inject.js"></script>
     <script src="https://mediafiles.botpress.cloud/887fcf53-8973-4c2b-90f6-ad7caf0bc340/webchat/config.js" defer></script>
-    <style>
-      .lead {
-        padding-top: 10px;
-        padding-bottom: 10px;
-        padding-left: 6px;
-        padding-right: 6px;
-        margin-top: 10px;
-        background-color: #f6f6f6;
-        width: 100%;
-      }
-    </style>
-  </head>
-
-  <body>
-    <div class='max-w-7xl mx-auto '>
+</head>
+<body>
+    <div class="max-w-7xl mx-auto">
         {% include 'navbar.html' %}
         {% block content %}
 
         {% endblock content %}
-        {% include "scripts.html" %}
-  </body>
+    </div>
+    {% include "scripts.html" %}
+</body>
 </html>

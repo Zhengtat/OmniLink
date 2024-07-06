@@ -8,7 +8,7 @@ from django.urls import reverse
 from .forms import AgentModelForm
 from .mixins import OrganisorAndLoginRequiredMixin
 from django.core.mail import send_mail
-from random import random
+import random
 
 
 # Create your views here.
