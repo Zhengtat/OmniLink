@@ -51,6 +51,20 @@ class AgentDetailView(OrganisorAndLoginRequiredMixin, generic.DetailView):
     def get_queryset(self):
         organisation = self.request.user.userprofile
         return Agent.objects.filter(organisation = organisation)
+    
+    def get_context_data(self, **kwargs):
+        context = super(AgentDetailView, self).get_context_data(**kwargs)
+        user = self.request.user
+        if user.is_organisor:
+            queryset = Lead.objects.filter(organisation = user.userprofile, agent__isnull = False)
+        else:
+            queryset = Lead.objects.filter(organisation = user.agent.organisation, agent__isnull = False)
+            #filter by sales person
+            queryset = queryset.filter(agent__user = user)
+        context.update({
+            "agent_leads": queryset
+        })
+        return context
         
 class AgentUpdateView(OrganisorAndLoginRequiredMixin, generic.UpdateView):
     template_name = "agents/agent_update.html"

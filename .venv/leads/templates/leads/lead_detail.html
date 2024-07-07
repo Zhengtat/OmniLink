@@ -2,13 +2,12 @@
 
 {% block content %}
 
-<section class="text-gray-600 body-font overflow-hidden">
-  <div class="container px-5 py-24 mx-auto">
-    <div class="lg:w-4/5 mx-auto flex flex-wrap">
-      <div class="lg:w-1/2 w-full lg:pr-10 lg:py-6 mb-6 lg:mb-0">
-        <h2 class="text-sm title-font text-gray-500 tracking-widest">LEAD</h2>
-        <h1 class="text-gray-900 text-3xl title-font font-medium mb-4">{{lead.first_name}} {{lead.last_name}} </h1>
-        <div class="flex mb-4">
+<section class="text-gray-600 body-font">
+  <div class="container flex flex-wrap px-5 py-24 mx-auto items-center">
+    <div class="flex flex-col md:w-1/2 md:pl-12">
+      <h1 class="sm:text-3xl text-2xl font-medium title-font mb-2 text-gray-900">LEAD</h1>
+      <h1 class="text-gray-900 text-3xl title-font font-medium mb-4">{{lead.first_name}} {{lead.last_name}} </h1>
+      <div class="flex mb-4">
           <a class="flex-grow text-indigo-500 border-b-2 border-indigo-500 py-2 text-lg px-1">
             Description
           </a>
@@ -34,26 +33,33 @@
           <span class="text-gray-500">Contact Information</span>
           <span class="ml-auto text-gray-900">{{ lead.contact_info }} </span>
         </div>
-      </div>
-
-    <a href="{% url 'leads:lead-task-create' lead.pk %}" class="text-white bg-blue-500 hover:bg-blue-600 px-3 py-2 rounded-md">Add a task</a>
-    </div>
-
-    {% for task in lead.tasks.all %}
-      <div class="mt-5 shadow px-4 sm:px-6">
-        <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4">
-            <dt class="text-sm font-medium text-gray-500">
-            Notes (<a href="{% url 'leads:lead-followup-update' followup.pk %}" class="text-blue-500 hover:text-blue-700">update</a>)
-            </dt>
-            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-            {{ task.notes }}
-            </dd>
-            <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-            {{ task.status }}
-            </dd>
+        <div>
+          <a href="{% url 'leads:lead-task-create' lead.pk %}" class="text-white bg-blue-500 hover:bg-blue-600 px-6 py-2 rounded-md">Add a task</a>
+          <a href="{% url 'leads:lead-task-create' lead.pk %}" class="text-white bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-md">View Past Purchases</a>
         </div>
       </div>
-    {% endfor %}
+    </div>
+    <div class="flex flex-col md:w-1/2 md:pl-12">
+      <h2 class="title-font font-semibold text-gray-800 tracking-wider text-sm mb-3">Tasks</h2>
+      {% for task in tasks %}
+        <div class="mt-5 shadow px-4 sm:px-6">
+          <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4">
+              <dt class="text-sm font-medium text-gray-500">
+              Notes (<a href="{% url 'leads:lead-task-update' lead.pk %}" class="text-blue-500 hover:text-blue-700">update</a>)
+              </dt>
+              <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+              {{ task.notes }}
+              </dd>
+              <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+              {{ task.status }}
+              </dd>
+              <a href="{% url 'leads:lead-task-delete' lead.pk %}" class="text-white bg-red-500 hover:bg-red-600 px-3 py-2 rounded-md">
+                Delete
+              </a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
   </div>
 </section>
 {% endblock content %}

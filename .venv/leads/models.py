@@ -37,6 +37,7 @@ class Lead(models.Model):
     email = models.EmailField()
     agent = models.ForeignKey("Agent", null = True, blank= True, on_delete = models.SET_NULL)
     category = models.ForeignKey("Category", related_name="leads", null = True, blank= True, on_delete= models.SET_NULL)
+    date_added = models.DateTimeField(auto_now_add=True)
     #if CASCADE, agent is deleted, lead is deleted
     #if SET_NULL, lead is null
     #if SET_DEFAULT, lead is set to default
@@ -109,14 +110,9 @@ class Task(models.Model):
     
     lead = models.ForeignKey("Lead", on_delete = models.CASCADE, related_name = 'created_task')
     notes = models.TextField()
-    due_date = models.DateTimeField(blank= True, null = True)
-    date = models.DateTimeField(auto_now_add= True)
+    due_date = models.DateField(null = True, blank= True)
     assigned_to = models.ForeignKey("Agent", on_delete = models.CASCADE, related_name = 'assigned_task', blank = True, null = True)
-    status = models.CharField(choices = STATUS_COMPLETION)
-
-    def save(self, *args, **kwargs):
-        self.due_date = self.date + datetime.timedelta(5)
-        super().save(*args, **kwargs)
+    status = models.CharField(choices = STATUS_COMPLETION, max_length= 20)
 
     def __str__(self):
         return self.description

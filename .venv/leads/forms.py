@@ -23,7 +23,8 @@ class TaskModelForm(forms.ModelForm):
         model = Task
         fields = (
             'notes',
-            'status'
+            'status',
+            'due_date'
         )
 
 class LeadForm(forms.Form):

@@ -44,6 +44,7 @@ class LeadListView(LoginRequiredMixin, ListView):
 class LeadDetailView(LoginRequiredMixin, DetailView):
     template_name = "leads/lead_detail.html"
     context_object_name = "lead"
+
     def get_queryset(self):
         user = self.request.user
         #initial query set of leads for tiktok
@@ -54,11 +55,18 @@ class LeadDetailView(LoginRequiredMixin, DetailView):
             #filter by sales person
             queryset = queryset.filter(agent__user = user)
         return queryset
+    
+    def get_context_data(self, **kwargs):
+        context = super(LeadDetailView, self).get_context_data(**kwargs)
+        lead = Lead.objects.get(pk=self.kwargs["pk"])
+        context.update({
+            "tasks": Task.objects.filter(lead = lead)
+        })
+        return context
 
 class LeadCreateView(LoginRequiredMixin, CreateView):
     template_name = "leads/lead_create.html"
-    form_lead= LeadModelForm
-    form_todo = L
+    form_class= LeadModelForm
 
     def get_success_url(self):
         return reverse("leads:lead-list")
@@ -72,7 +80,6 @@ class LeadCreateView(LoginRequiredMixin, CreateView):
             from_email= "test@test.com",
             recipient_list=["test2@test.com"]
         )
-        ToDo.objects.create(user = lead, description = lead.description)
         return super(LeadCreateView,self).form_valid(form)
     
 class LeadUpdateView(OrganisorAndLoginRequiredMixin, UpdateView):
@@ -191,18 +198,20 @@ class TaskCreateView(LoginRequiredMixin, CreateView):
         return reverse("leads:lead-detail", kwargs={"pk": self.kwargs["pk"]})
 
     def get_context_data(self, **kwargs):
-        context = super(TodoCreateView, self).get_context_data(**kwargs)
+        context = super(TaskCreateView, self).get_context_data(**kwargs)
         context.update({
             "lead": Lead.objects.get(pk=self.kwargs["pk"])
         })
         return context
 
     def form_valid(self, form):
+        task = form.save(commit=False)
         lead = Lead.objects.get(pk=self.kwargs["pk"])
-        todo = form.save(commit=False)
-        todo.lead = lead
-        todo.save()
-        return super(TodoCreateView, self).form_valid(form)
+        if lead.agent:
+            agent = lead.agent
+            task.assigned_to = agent
+        task.lead = lead
+        return super(TaskCreateView, self).form_valid(form)
 
 
 class TaskUpdateView(LoginRequiredMixin, UpdateView):
@@ -223,6 +232,40 @@ class TaskUpdateView(LoginRequiredMixin, UpdateView):
     def get_success_url(self):
         return reverse("leads:lead-detail", kwargs={"pk": self.get_object().lead.id})
 
+
+class DashboardView(OrganisorAndLoginRequiredMixin, TemplateView):
+    template_name = "dashboard.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(DashboardView, self).get_context_data(**kwargs)
+
+        user = self.request.user
+
+        # How many leads we have in total
+        total_lead_count = Lead.objects.filter(organisation=user.userprofile).count()
+
+        # How many new leads in the last 30 days
+        thirty_days_ago = datetime.date.today() - datetime.timedelta(days=30)
+
+        total_in_past30 = Lead.objects.filter(
+            organisation=user.userprofile,
+            date_added__gte=thirty_days_ago
+        ).count()
+
+        # How many converted leads in the last 30 days
+        converted_category = Category.objects.get(name="Converted")
+        converted_in_past30 = Lead.objects.filter(
+            organisation=user.userprofile,
+            category=converted_category,
+            converted_date__gte=thirty_days_ago
+        ).count()
+
+        context.update({
+            "total_lead_count": total_lead_count,
+            "total_in_past30": total_in_past30,
+            "converted_in_past30": converted_in_past30
+        })
+        return context
 
 class TaskDeleteView(OrganisorAndLoginRequiredMixin, DeleteView):
     template_name = "leads/task_delete.html"
