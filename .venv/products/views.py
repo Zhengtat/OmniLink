@@ -39,3 +39,12 @@ class ProductDeleteView(LoginRequiredMixin,generic.DeleteView):
         
     def get_success_url(self):
         return reverse("products:products")
+    
+class ProductRelatedView(LoginRequiredMixin, generic.DetailView):
+    template_name = "products/related-products.html"
+    context_object_name = "product"
+    
+    def get_queryset(self):
+        product = Product.objects.get(id = id)
+        queryset = Product.objects.filter(category = product.product_category)
+        return queryset

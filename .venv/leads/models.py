@@ -66,7 +66,6 @@ class Product(models.Model):
         ('Mobile Accessories', 'Mobile Accessories'),
         ('Goceries', 'Goceries'),
     )
-
     name = models.CharField(max_length = 300)
     description = models.TextField()
     unit_price = models.DecimalField(max_digits = 10, decimal_places = 2)

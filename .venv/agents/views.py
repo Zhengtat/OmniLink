@@ -3,7 +3,7 @@ from django.db.models.query import QuerySet
 from django.shortcuts import render
 from django.views import generic
 from django.contrib.auth.mixins import LoginRequiredMixin
-from leads.models import Agent
+from leads.models import Agent, Lead
 from django.urls import reverse
 from .forms import AgentModelForm
 from .mixins import OrganisorAndLoginRequiredMixin

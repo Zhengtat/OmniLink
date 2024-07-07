@@ -5,7 +5,7 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.http import HttpResponse
 from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView, DeleteView, FormView
-from .models import Lead, Agent, Category
+from .models import Lead, Agent, Category, Purchase
 from .forms import LeadForm, LeadModelForm, CustomedUserCreationForm, AssignAgentForm, LeadCategoryUpdateForm
 from django.core.mail import send_mail
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -181,39 +181,26 @@ class AssignAgentView(OrganisorAndLoginRequiredMixin, FormView):
         lead.save()
         return super(AssignAgentView, self).form_valid(form)
     
-class DashboardView(OrganisorAndLoginRequiredMixin, TemplateView):
-    template_name = "dashboard.html"
+class PurchaseProductView(OrganisorAndLoginRequiredMixin, FormView):
+    template_name = "leads/purchase_product.html"
+    form_class = PurchaseProductForm
 
-    def get_context_data(self, **kwargs):
-        context = super(DashboardView, self).get_context_data(**kwargs)
-
-        user = self.request.user
-
-        # How many leads we have in total
-        total_lead_count = Lead.objects.filter(organisation=user.userprofile).count()
-
-        # How many new leads in the last 30 days
-        thirty_days_ago = datetime.date.today() - datetime.timedelta(days=30)
-
-        total_in_past30 = Lead.objects.filter(
-            organisation=user.userprofile,
-            date_added__gte=thirty_days_ago
-        ).count()
-
-        # How many converted leads in the last 30 days
-        converted_category = Category.objects.get(name="Converted")
-        converted_in_past30 = Lead.objects.filter(
-            organisation=user.userprofile,
-            category=converted_category,
-            converted_date__gte=thirty_days_ago
-        ).count()
-
-        context.update({
-            "total_lead_count": total_lead_count,
-            "total_in_past30": total_in_past30,
-            "converted_in_past30": converted_in_past30
+    def get_form_kwargs(self, **kwargs):
+        kwargs = super(AssignAgentView, self).get_form_kwargs(**kwargs)
+        kwargs.update ({
+            "request": self.request
         })
-        return context
+        return kwargs
+    
+    def get_success_url(self):
+        return reverse("leads:lead-list")
+    
+    def form_valid(self, form):
+        agent = form.cleaned_data["agent"]
+        lead = Lead.objects.get(id = self.kwargs["pk"])
+        lead.agent = agent
+        lead.save()
+        return super(AssignAgentView, self).form_valid(form)
 
 def lead_list(request):
     leads = Lead.objects.all()
@@ -231,27 +218,6 @@ def lead_detail(request, pk):
         "lead" : lead
     }
     return render(request, "leads/lead_detail.html", context)
-
-###def lead_create(request):
-    form = LeadModelForm()
-    if request.method == "POST":
-        form  = LeadForm(request.POST)
-        if form.is_valid():
-            first_name = form.cleaned_data['first_name']
-            last_name = form.cleaned_data['last_name']
-            age = form.cleaned_data['age']
-            agent = Agent.objects.first()
-            Lead.objects.create(
-                first_name = first_name,
-                last_name = last_name,
-                age = age,
-                agent = agent
-            )
-            return redirect('/leads')
-    context = {
-        "form": form
-    }
-    return render(request, "leads/lead_create.html",context)###
 
 def lead_create(request):
     form = LeadModelForm()
