@@ -260,10 +260,18 @@ class DashboardView(OrganisorAndLoginRequiredMixin, TemplateView):
             converted_date__gte=thirty_days_ago
         ).count()
 
+        total_purchases = Purchase.objects.all()
+        total_profit = 0
+        for purchase in total_purchases:
+            total_profit += purchase.amount
+        number_of_sales = total_purchases.count()
+        
         context.update({
             "total_lead_count": total_lead_count,
             "total_in_past30": total_in_past30,
-            "converted_in_past30": converted_in_past30
+            "converted_in_past30": converted_in_past30,
+            "total_profit": total_profit,
+            "number_of_sales": number_of_sales
         })
         return context
 

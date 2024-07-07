@@ -38,6 +38,8 @@ class Lead(models.Model):
     agent = models.ForeignKey("Agent", null = True, blank= True, on_delete = models.SET_NULL)
     category = models.ForeignKey("Category", related_name="leads", null = True, blank= True, on_delete= models.SET_NULL)
     date_added = models.DateTimeField(auto_now_add=True)
+    converted_date = models.DateTimeField(null=True, blank=True)
+
     #if CASCADE, agent is deleted, lead is deleted
     #if SET_NULL, lead is null
     #if SET_DEFAULT, lead is set to default
@@ -66,7 +68,7 @@ class Product(models.Model):
         ('Kitchen & Dining', 'Kitchen & Dining'),
         ('Toys', "Toys"),
         ('Mobile Accessories', 'Mobile Accessories'),
-        ('Goceries', 'Goceries'),
+        ('Groceries', 'Groceries'),
     )
     name = models.CharField(max_length = 300)
     description = models.TextField()

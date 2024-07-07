@@ -1,0 +1,51 @@
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('', LandingPageView.as_view(), name = 'landing_page'),
+    path('leads/', include('leads.urls', namespace =  "leads")),
+    path('login/', LoginView.as_view(), name='login'),
+    path('logout/', LogoutView.as_view(), name = 'logout'),
+    path('signup/', SignupView.as_view(), name = 'signup' ),
+    path('agents/', include('agents.urls', namespace = "agents")),
+    path('reset-password/', PasswordResetView.as_view(), name = 'reset-password'),
+    path('password-reset-done/', PasswordResetDoneView.as_view(), name = 'password_reset_done'),
+    path('password-reset-confirm/<uidb64>/<token>/', PasswordResetConfirmView.as_view(), name = 'password_reset_confirm'),
+    path('password-reset-complete/', PasswordResetCompleteView.as_view(), name = 'password_reset_complete'),
+    path('products/', include('products.urls', namespace = "products")),
+    path('purchases/', include('purchases.urls', namespace = "purchases")),
+    path('dashboard/', DashboardView.as_view(), name='dashboard'),
+]
+
+urlpatterns = [
+    path('', ProductListView.as_view(), name = 'products'),
+    path('create/', ProductCreateView.as_view(), name = 'product-create'),
+    path('<int:pk>/update/', ProductUpdateView.as_view(), name='product-update'),
+    path('<int:pk>/delete/', ProductDeleteView.as_view(), name='product-delete'),
+    path('<int:pk>/related-products/', ProductRelatedView.as_view(), name='related-products'),
+]
+
+urlpatterns = [
+    path('create/', CreatePurchaseView.as_view(), name='create-purchase'),
+]
+
+urlpatterns = [
+    path('', LeadListView.as_view(), name='lead-list'),
+    path('create/', LeadCreateView.as_view(), name='lead-create'),
+    path('<int:pk>/', LeadDetailView.as_view(), name='lead-detail'),
+    path('<int:pk>/update/', LeadUpdateView.as_view(), name='lead-update'),
+    path('<int:pk>/delete/', LeadDeleteView.as_view(), name='lead-delete'),
+    path('<int:pk>/assign-agent/', AssignAgentView.as_view(), name = 'assign-agent'),
+    path('categories/', CategoryListView.as_view(), name = 'category-list'),
+    path('categories/<int:pk>/', CategoryDetailView.as_view(), name = 'category-detail'),
+    path('<int:pk>/category/', LeadCategoryUpdateView.as_view(), name = 'lead-category-update'),
+    path('<int:pk>/task-create/', TaskCreateView.as_view(), name='lead-task-create'),
+    path('<int:pk>/task-update/', TaskUpdateView.as_view(), name='lead-task-update'),
+    path('<int:pk>/task-delete/', TaskDeleteView.as_view(), name='lead-task-delete'),
+]
+
+urlpatterns = [
+    path('', AgentListView.as_view(), name = 'agents'),
+    path('create/', AgentCreateView.as_view(), name = 'agent-create'),
+    path('<int:pk>/', AgentDetailView.as_view(), name='agent-detail'),
+    path('<int:pk>/update/', AgentUpdateView.as_view(), name='agent-update'),
+    path('<int:pk>/delete/', AgentDeleteView.as_view(), name='agent-delete'),
+]
