@@ -180,27 +180,7 @@ class AssignAgentView(OrganisorAndLoginRequiredMixin, FormView):
         lead.agent = agent
         lead.save()
         return super(AssignAgentView, self).form_valid(form)
-    
-class PurchaseProductView(OrganisorAndLoginRequiredMixin, FormView):
-    template_name = "leads/purchase_product.html"
-    form_class = PurchaseProductForm
 
-    def get_form_kwargs(self, **kwargs):
-        kwargs = super(AssignAgentView, self).get_form_kwargs(**kwargs)
-        kwargs.update ({
-            "request": self.request
-        })
-        return kwargs
-    
-    def get_success_url(self):
-        return reverse("leads:lead-list")
-    
-    def form_valid(self, form):
-        agent = form.cleaned_data["agent"]
-        lead = Lead.objects.get(id = self.kwargs["pk"])
-        lead.agent = agent
-        lead.save()
-        return super(AssignAgentView, self).form_valid(form)
 
 def lead_list(request):
     leads = Lead.objects.all()

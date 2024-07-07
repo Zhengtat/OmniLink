@@ -26,7 +26,10 @@
                                 Email
                                 </th>
                                 <th scope="col" class="relative px-6 py-3">
-                                <span class="sr-only">View Leads</span>
+                                <span class="sr-only">View Dashboard</span>
+                                </th>
+                                <th scope="col" class="relative px-6 py-3">
+                                <span class="sr-only">Add a purchase</span>
                                 </th>
                                 <th scope="col" class="relative px-6 py-3">
                                 <span class="sr-only">Edit</span>
@@ -44,7 +47,12 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <a href="{% url 'agents:agent-detail' agent.pk %}" class="text-indigo-600 hover:text-indigo-900">
-                                            View Leads
+                                            View Dashboard
+                                        </a>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <a href="{% url 'purchases:create-purchase' %}" class="text-indigo-600 hover:text-indigo-900">
+                                            Add a purchase
                                         </a>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">

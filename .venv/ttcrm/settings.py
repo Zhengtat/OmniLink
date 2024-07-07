@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'leads',
     'agents',
     'products',
+    'purchases',
     #third party apps
     'crispy_forms',
     "crispy_tailwind",

@@ -48,7 +48,7 @@ class Agent(models.Model):
     organisation = models.ForeignKey(UserProfile, on_delete = models.CASCADE)
 
     def __str__(self):
-        return self.user.email
+        return self.user.first_name
 
 class Category(models.Model):
     name = models.CharField(max_length = 30) #New, Contacted, Converted, Unconverted
@@ -84,12 +84,13 @@ class Purchase(models.Model):
         ('PayPal', 'PayPal'),
     )
 
-    lead = models.ForeignKey("Lead", on_delete = models.CASCADE)
-    product = models.ForeignKey("Product", on_delete = models.CASCADE)
-    amount = models.DecimalField(max_digits = 10, decimal_places = 2)
+    lead = models.ForeignKey("Lead", on_delete = models.CASCADE, blank= True, null = True)
+    product = models.ForeignKey("Product", on_delete = models.CASCADE, blank = True, null = True)
+    agent = models.ForeignKey("Agent",on_delete = models.CASCADE, blank = True, null = True)
     payment_method = models.CharField(choices = PAYMENT_CHOICES, max_length = 100)
-    purchase_date = models.DateTimeField()
+    purchase_date = models.DateTimeField(auto_now_add= True)
     quantity = models.PositiveIntegerField()
+    amount = models.DecimalField(max_digits = 10, decimal_places = 2, blank= True, null = True)
 
     def save(self, *args, **kwargs):
         self.amount = self.product.unit_price * self.quantity

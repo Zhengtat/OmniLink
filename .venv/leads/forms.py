@@ -38,11 +38,6 @@ class AssignAgentForm(forms.Form):
         super(AssignAgentForm, self).__init__(*args, **kwargs)
         self.fields["agent"].queryset = agents
 
-class PurchaseProductForm(forms.Form):
-    
-    def __init__(self, *args, **kwargs):
-        agent = kwargs.pop()
-
 class LeadCategoryUpdateForm(forms.ModelForm):
     class Meta:
         model = Lead
