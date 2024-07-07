@@ -1,5 +1,5 @@
 from django import forms
-from .models import Lead, Agent, Product
+from .models import Lead, Agent, Product, Task
 from django.contrib.auth.forms import UserCreationForm, UsernameField
 from django.contrib.auth import get_user_model
 
@@ -16,6 +16,14 @@ class LeadModelForm(forms.ModelForm):
             'agent',
             'description',
             'email',
+        )
+
+class TaskModelForm(forms.ModelForm):
+    class Meta:
+        model = Task
+        fields = (
+            'notes',
+            'status'
         )
 
 class LeadForm(forms.Form):

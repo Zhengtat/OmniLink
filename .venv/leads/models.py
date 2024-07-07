@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.db.models.signals import post_save
+import datetime
 #for authentication: gives a class authentication powers
 
 
@@ -99,28 +100,26 @@ class Purchase(models.Model):
     def __str__(self):
         return f"{self.product_name} - {self.amount}"
 
-class ToDo(models.Model):
+class Task(models.Model):
     STATUS_COMPLETION = (
         ('Completed', 'Completed'),
         ('Pending', 'Pending'),
         ('Incomplete', 'Incomplete')
     )
     
-    user = models.ForeignKey("User", on_delete = models.CASCADE, related_name = 'created_todos')
-    description = models.TextField()
-    due_date = models.DateTimeField()
-    assigned_to = models.ForeignKey("Agent", on_delete = models.CASCADE, related_name = 'assigned_todos')
+    lead = models.ForeignKey("Lead", on_delete = models.CASCADE, related_name = 'created_task')
+    notes = models.TextField()
+    due_date = models.DateTimeField(blank= True, null = True)
+    date = models.DateTimeField(auto_now_add= True)
+    assigned_to = models.ForeignKey("Agent", on_delete = models.CASCADE, related_name = 'assigned_task', blank = True, null = True)
+    status = models.CharField(choices = STATUS_COMPLETION)
+
+    def save(self, *args, **kwargs):
+        self.due_date = self.date + datetime.timedelta(5)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.description
-    
-class Reminder(models.Model):
-    user = models.ForeignKey(User, on_delete = models.CASCADE)
-    todo = models.ForeignKey(ToDo, on_delete = models.CASCADE)
-    remind_at = models.DateTimeField()
-
-    def __str__(self):
-        return f"Reminder for {self.todo} at {self.remind_at}"
     
 def post_user_created_signal(sender, instance, created, **kwargs):
     if created:

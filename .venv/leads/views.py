@@ -5,8 +5,8 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.http import HttpResponse
 from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView, DeleteView, FormView
-from .models import Lead, Agent, Category, Purchase
-from .forms import LeadForm, LeadModelForm, CustomedUserCreationForm, AssignAgentForm, LeadCategoryUpdateForm
+from .models import Lead, Agent, Category, Purchase, Task
+from .forms import LeadForm, LeadModelForm, CustomedUserCreationForm, AssignAgentForm, LeadCategoryUpdateForm, TaskModelForm
 from django.core.mail import send_mail
 from django.contrib.auth.mixins import LoginRequiredMixin
 from agents.mixins import OrganisorAndLoginRequiredMixin
@@ -57,7 +57,8 @@ class LeadDetailView(LoginRequiredMixin, DetailView):
 
 class LeadCreateView(LoginRequiredMixin, CreateView):
     template_name = "leads/lead_create.html"
-    form_class = LeadModelForm
+    form_lead= LeadModelForm
+    form_todo = L
 
     def get_success_url(self):
         return reverse("leads:lead-list")
@@ -71,6 +72,7 @@ class LeadCreateView(LoginRequiredMixin, CreateView):
             from_email= "test@test.com",
             recipient_list=["test2@test.com"]
         )
+        ToDo.objects.create(user = lead, description = lead.description)
         return super(LeadCreateView,self).form_valid(form)
     
 class LeadUpdateView(OrganisorAndLoginRequiredMixin, UpdateView):
@@ -181,6 +183,64 @@ class AssignAgentView(OrganisorAndLoginRequiredMixin, FormView):
         lead.save()
         return super(AssignAgentView, self).form_valid(form)
 
+class TaskCreateView(LoginRequiredMixin, CreateView):
+    template_name = "leads/tasks_create.html"
+    form_class = TaskModelForm
+
+    def get_success_url(self):
+        return reverse("leads:lead-detail", kwargs={"pk": self.kwargs["pk"]})
+
+    def get_context_data(self, **kwargs):
+        context = super(TodoCreateView, self).get_context_data(**kwargs)
+        context.update({
+            "lead": Lead.objects.get(pk=self.kwargs["pk"])
+        })
+        return context
+
+    def form_valid(self, form):
+        lead = Lead.objects.get(pk=self.kwargs["pk"])
+        todo = form.save(commit=False)
+        todo.lead = lead
+        todo.save()
+        return super(TodoCreateView, self).form_valid(form)
+
+
+class TaskUpdateView(LoginRequiredMixin, UpdateView):
+    template_name = "leads/tasks_update.html"
+    form_class = TaskModelForm
+
+    def get_queryset(self):
+        user = self.request.user
+        # initial queryset of leads for the entire organisation
+        if user.is_organisor:
+            queryset = Task.objects.filter(lead__organisation=user.userprofile)
+        else:
+            queryset = Task.objects.filter(lead__organisation=user.agent.organisation)
+            # filter for the agent that is logged in
+            queryset = queryset.filter(lead__agent__user=user)
+        return queryset
+
+    def get_success_url(self):
+        return reverse("leads:lead-detail", kwargs={"pk": self.get_object().lead.id})
+
+
+class TaskDeleteView(OrganisorAndLoginRequiredMixin, DeleteView):
+    template_name = "leads/task_delete.html"
+
+    def get_success_url(self):
+        followup = Task.objects.get(id=self.kwargs["pk"])
+        return reverse("leads:lead-detail", kwargs={"pk": followup.lead.pk})
+
+    def get_queryset(self):
+        user = self.request.user
+        # initial queryset of leads for the entire organisation
+        if user.is_organisor:
+            queryset = Task.objects.filter(lead__organisation=user.userprofile)
+        else:
+            queryset = Task.objects.filter(lead__organisation=user.agent.organisation)
+            # filter for the agent that is logged in
+            queryset = queryset.filter(lead__agent__user=user)
+        return queryset
 
 def lead_list(request):
     leads = Lead.objects.all()
